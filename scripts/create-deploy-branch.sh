@@ -99,9 +99,11 @@ if [[ "${SKIP_PUSH:-0}" == "1" ]]; then
   echo "SKIP_PUSH=1 definido. Pulando push para o remoto."
   echo "Branch '${BRANCH_NAME}' atualizado localmente em '${WORKTREE_DIR}'."
 else
-  echo "Fazendo push automático para ${REMOTE_NAME} ${BRANCH_NAME}..."
+  echo "Fazendo push automático (force) para ${REMOTE_NAME} ${BRANCH_NAME}..."
   pushd "${WORKTREE_DIR}" >/dev/null
-  if [[ "${FORCE_PUSH:-0}" == "1" ]]; then
+  # Força sobrescrever o branch remoto para garantir que apenas o conteúdo atual seja considerado
+  # Use FORCE_PUSH=0 para desabilitar e fazer push normal, se necessário
+  if [[ "${FORCE_PUSH:-1}" == "1" ]]; then
     git push --force-with-lease -u "${REMOTE_NAME}" "${BRANCH_NAME}"
   else
     git push -u "${REMOTE_NAME}" "${BRANCH_NAME}"
