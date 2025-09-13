@@ -84,7 +84,8 @@
     "build": "react-scripts build",
     "builddev": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && react-scripts build",
     "test": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && react-scripts test",
-    "eject": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && react-scripts eject"
+    "eject": "export NODE_OPTIONS=\"--max-old-space-size=8192\" && react-scripts eject",
+    "deploy:branch": "bash scripts/create-deploy-branch.sh"
   },
   "eslintConfig": {
     "extends": "react-app"
