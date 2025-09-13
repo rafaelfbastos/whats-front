@@ -38,6 +38,21 @@ fi
 
 WORKTREE_DIR="${REPO_ROOT}/.deploy-worktree"
 
+# Limpa referências de worktrees antigas que possam causar conflito
+git worktree prune || true
+
+# Se já existe um worktree usando o mesmo branch, remova antes
+EXISTING_WT_PATH="$(git worktree list --porcelain | awk -v b=\"refs/heads/${BRANCH_NAME}\" '
+  $1=="worktree"{path=$2}
+  $1=="branch" && $2==b{print path}
+')"
+if [[ -n "${EXISTING_WT_PATH}" ]]; then
+  echo "Removendo worktree existente para o branch '${BRANCH_NAME}' em '${EXISTING_WT_PATH}'..."
+  git worktree unlock "${EXISTING_WT_PATH}" >/dev/null 2>&1 || true
+  git worktree remove -f "${EXISTING_WT_PATH}" || true
+  git worktree prune || true
+fi
+
 if [[ -d "${WORKTREE_DIR}" ]]; then
   rm -rf "${WORKTREE_DIR}"
 fi
@@ -80,9 +95,13 @@ fi
 
 popd >/dev/null
 
-echo "Fazendo push automático para ${REMOTE_NAME} ${BRANCH_NAME}..."
-pushd "${WORKTREE_DIR}" >/dev/null
-git push -u "${REMOTE_NAME}" "${BRANCH_NAME}"
-popd >/dev/null
-
-echo "Branch '${BRANCH_NAME}' atualizado e enviado para ${REMOTE_NAME}."
+if [[ "${SKIP_PUSH:-0}" == "1" ]]; then
+  echo "SKIP_PUSH=1 definido. Pulando push para o remoto."
+  echo "Branch '${BRANCH_NAME}' atualizado localmente em '${WORKTREE_DIR}'."
+else
+  echo "Fazendo push automático para ${REMOTE_NAME} ${BRANCH_NAME}..."
+  pushd "${WORKTREE_DIR}" >/dev/null
+  git push -u "${REMOTE_NAME}" "${BRANCH_NAME}"
+  popd >/dev/null
+  echo "Branch '${BRANCH_NAME}' atualizado e enviado para ${REMOTE_NAME}."
+fi
