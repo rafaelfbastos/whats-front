@@ -101,7 +101,11 @@ if [[ "${SKIP_PUSH:-0}" == "1" ]]; then
 else
   echo "Fazendo push automático para ${REMOTE_NAME} ${BRANCH_NAME}..."
   pushd "${WORKTREE_DIR}" >/dev/null
-  git push -u "${REMOTE_NAME}" "${BRANCH_NAME}"
+  if [[ "${FORCE_PUSH:-0}" == "1" ]]; then
+    git push --force-with-lease -u "${REMOTE_NAME}" "${BRANCH_NAME}"
+  else
+    git push -u "${REMOTE_NAME}" "${BRANCH_NAME}"
+  fi
   popd >/dev/null
   echo "Branch '${BRANCH_NAME}' atualizado e enviado para ${REMOTE_NAME}."
 fi
